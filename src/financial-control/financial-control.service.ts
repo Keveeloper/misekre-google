@@ -30,7 +30,7 @@ export class FinancialControlService {
     const transaction = this.transactionRepository.create({
       amount,
       type,
-      date: new Date(date),
+      date: new Date(date.substring(0, 10) + 'T12:00:00Z'),
       user,
       category,
     });
