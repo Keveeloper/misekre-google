@@ -4,6 +4,8 @@ import {
   Query,
   Headers,
   UnauthorizedException,
+  Post,
+  Body,
 } from '@nestjs/common';
 import { GoogleService } from './google.service';
 import { ConfigService } from '@nestjs/config';
@@ -40,5 +42,35 @@ export class GoogleController {
       );
     }
     return await this.googleService.getCalendarEvents();
+  }
+
+  // Recuerda importar Post y Body arriba:
+  // import { Controller, Get, Post, Body, Query, Headers, UnauthorizedException } from '@nestjs/common';
+
+  @Post('events')
+  async createEvent(
+    @Headers('x-api-key') apiKey: string,
+    @Body() body: { summary: string; startTime: string; endTime: string },
+  ) {
+    const SECRET_KEY = this.configService.get<string>('MISEKRE_API_KEY');
+
+    if (apiKey !== SECRET_KEY) {
+      throw new UnauthorizedException(
+        'No tienes permiso para ver esto, perrito.',
+      );
+    }
+
+    if (!body.summary || !body.startTime || !body.endTime) {
+      return {
+        status: 'error',
+        message: 'Faltan datos (summary, startTime, endTime)',
+      };
+    }
+
+    return await this.googleService.createCalendarEvent(
+      body.summary,
+      body.startTime,
+      body.endTime,
+    );
   }
 }

@@ -19,11 +19,7 @@ export class GoogleService {
   getAuthUrl() {
     return this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
-      scope: [
-        'https://www.googleapis.com/auth/calendar.readonly',
-        'email',
-        'profile',
-      ],
+      scope: ['https://www.googleapis.com/auth/calendar', 'email', 'profile'],
       prompt: 'consent',
     });
   }
@@ -71,6 +67,65 @@ export class GoogleService {
       return {
         status: 'error',
         message: 'No se pudieron cargar los eventos',
+        details: errorMessage,
+      };
+    }
+  }
+
+  // --- NUEVA FUNCIÓN PARA CREAR EVENTOS ---
+  async createCalendarEvent(
+    summary: string,
+    startTime: string,
+    endTime: string,
+  ) {
+    try {
+      const tokenPath = join(process.cwd(), 'google-tokens.json');
+      if (!fs.existsSync(tokenPath)) {
+        throw new Error(`Archivo de tokens no encontrado en: ${tokenPath}`);
+      }
+
+      const tokens = JSON.parse(
+        fs.readFileSync(tokenPath, 'utf8'),
+      ) as Credentials;
+      this.oauth2Client.setCredentials(tokens);
+
+      console.log('Scopes actuales del token:', tokens.scope);
+
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: this.oauth2Client,
+      });
+
+      // Estructura del evento que exige Google
+      const event = {
+        summary: summary,
+        start: {
+          dateTime: startTime, // Formato esperado: '2026-03-14T10:00:00-05:00'
+          timeZone: 'America/Bogota',
+        },
+        end: {
+          dateTime: endTime,
+          timeZone: 'America/Bogota',
+        },
+      };
+
+      const res = await calendar.events.insert({
+        calendarId: 'primary',
+        requestBody: event,
+      });
+
+      return {
+        status: 'success',
+        message: '¡Evento creado como un rey!',
+        link: res.data.htmlLink,
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error('Error al crear evento:', errorMessage);
+      return {
+        status: 'error',
+        message: 'Misekre no pudo agendar esto',
         details: errorMessage,
       };
     }
