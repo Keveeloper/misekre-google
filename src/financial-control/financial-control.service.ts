@@ -49,4 +49,27 @@ export class FinancialControlService {
       order: { date: 'DESC' },
     });
   }
+
+  async getTransactionsByDate(telegramId: string, searchDate: string, type?: CategoryType) {
+    const user = await this.usersService.findByTelegramId(telegramId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const queryDate = new Date(searchDate.substring(0, 10) + 'T12:00:00Z');
+
+    const whereClause: any = {
+      user: { id: user.id },
+      date: queryDate,
+    };
+
+    if (type) {
+      whereClause.type = type;
+    }
+
+    return this.transactionRepository.find({
+      where: whereClause,
+      order: { createdAt: 'DESC' },
+    });
+  }
 }
