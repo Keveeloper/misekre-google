@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { GoogleService } from './google.service';
 import { ConfigService } from '@nestjs/config';
+import { TrackKpi } from '../kpi/decorators/track-kpi.decorator';
+import { KpiModule } from '../kpi/kpi.enums';
 
 @Controller('google')
 export class GoogleController {
@@ -34,6 +36,7 @@ export class GoogleController {
   }
 
   @Get('events')
+  @TrackKpi({ module: KpiModule.CALENDAR, operation: 'get_events' })
   async getEvents(@Headers('x-api-key') apiKey: string) {
     const SECRET_KEY = this.configService.get<string>('MISEKRE_API_KEY');
     if (apiKey !== SECRET_KEY) {
@@ -48,6 +51,7 @@ export class GoogleController {
   // import { Controller, Get, Post, Body, Query, Headers, UnauthorizedException } from '@nestjs/common';
 
   @Post('events')
+  @TrackKpi({ module: KpiModule.CALENDAR, operation: 'create_event' })
   async createEvent(
     @Headers('x-api-key') apiKey: string,
     @Body() body: { summary: string; startTime: string; endTime: string },
@@ -71,6 +75,46 @@ export class GoogleController {
       body.summary,
       body.startTime,
       body.endTime,
+    );
+  }
+
+  @Get('tasks')
+  @TrackKpi({ module: KpiModule.TASKS, operation: 'get_tasks' })
+  async getTasks(@Headers('x-api-key') apiKey: string) {
+    const SECRET_KEY = this.configService.get<string>('MISEKRE_API_KEY');
+    if (apiKey !== SECRET_KEY) {
+      throw new UnauthorizedException(
+        'No tienes permiso para ver esto, perrito.',
+      );
+    }
+    return await this.googleService.getTasks();
+  }
+
+  @Post('tasks')
+  @TrackKpi({ module: KpiModule.TASKS, operation: 'create_task' })
+  async createTask(
+    @Headers('x-api-key') apiKey: string,
+    @Body() body: { title: string; notes?: string; due?: string },
+  ) {
+    const SECRET_KEY = this.configService.get<string>('MISEKRE_API_KEY');
+
+    if (apiKey !== SECRET_KEY) {
+      throw new UnauthorizedException(
+        'No tienes permiso para ver esto, perrito.',
+      );
+    }
+
+    if (!body.title) {
+      return {
+        status: 'error',
+        message: 'Falta el dato requerido: title',
+      };
+    }
+
+    return await this.googleService.createTask(
+      body.title,
+      body.notes,
+      body.due,
     );
   }
 }

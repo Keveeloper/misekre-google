@@ -5,6 +5,9 @@
 
 #json google files
 google-tokens.json
+# Google service account key (private key — nunca versionar)
+misekre-*.json
+*-service-account*.json
 *.tar.gz
 
 # Logs

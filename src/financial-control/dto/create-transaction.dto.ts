@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsNumber, IsDateString, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsDateString,
+  IsEnum,
+} from 'class-validator';
 import { CategoryType } from '../entities/category.entity';
 
 export class CreateTransactionDto {

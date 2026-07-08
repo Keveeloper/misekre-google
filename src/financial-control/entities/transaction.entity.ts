@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Category, CategoryType } from './category.entity';
 
@@ -16,10 +22,16 @@ export class Transaction {
   @Column({ type: 'date' })
   date: Date;
 
-  @ManyToOne(() => User, (user) => user.transactions, { eager: true, nullable: false })
+  @ManyToOne(() => User, (user) => user.transactions, {
+    eager: true,
+    nullable: false,
+  })
   user: User;
 
-  @ManyToOne(() => Category, (category) => category.transactions, { eager: true, nullable: false })
+  @ManyToOne(() => Category, (category) => category.transactions, {
+    eager: true,
+    nullable: false,
+  })
   category: Category;
 
   @CreateDateColumn()

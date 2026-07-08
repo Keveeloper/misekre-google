@@ -16,12 +16,17 @@ export class FinancialControlService {
     private readonly usersService: UsersService,
   ) {}
 
-  async createTransaction(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
-    const { telegramId, amount, type, date, categoryName } = createTransactionDto;
+  async createTransaction(
+    createTransactionDto: CreateTransactionDto,
+  ): Promise<Transaction> {
+    const { telegramId, amount, type, date, categoryName } =
+      createTransactionDto;
 
     const user = await this.usersService.findOrCreate(telegramId);
 
-    let category = await this.categoryRepository.findOne({ where: { name: categoryName, type } });
+    let category = await this.categoryRepository.findOne({
+      where: { name: categoryName, type },
+    });
     if (!category) {
       category = this.categoryRepository.create({ name: categoryName, type });
       await this.categoryRepository.save(category);
@@ -50,7 +55,11 @@ export class FinancialControlService {
     });
   }
 
-  async getTransactionsByDate(telegramId: string, searchDate: string, type?: CategoryType) {
+  async getTransactionsByDate(
+    telegramId: string,
+    searchDate: string,
+    type?: CategoryType,
+  ) {
     const user = await this.usersService.findByTelegramId(telegramId);
     if (!user) {
       throw new NotFoundException('User not found');
